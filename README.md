@@ -1,153 +1,33 @@
 # Banking Customer Churn Analysis
 
-## Project Overview
+Churn analysis of **10,000 retail-bank customers** with a **20.4% churn rate**: exploratory analysis of who leaves, then three classification models compared on their ability to catch churners before they go.
 
-This project analyzes customer churn in a retail banking context using Python.
+## Data
 
-The goal is to understand which customer characteristics are associated with churn and to build machine learning models that can help identify customers who are more likely to leave the bank.
+Customer-level banking dataset with demographics, credit score, geography, balance, product usage, activity status and salary. Target variable: `Exited` (1 = churned, 0 = stayed).
 
-The project includes data cleaning, exploratory data analysis, customer segmentation, correlation analysis, machine learning modeling, model comparison, and business recommendations.
+Features: `CreditScore`, `Geography`, `Gender`, `Age`, `Tenure`, `Balance`, `NumOfProducts`, `HasCrCard`, `IsActiveMember`, `EstimatedSalary`.
 
-## Tools Used
-
-- Python
-- pandas
-- NumPy
-- matplotlib
-- scikit-learn
-- Jupyter Notebook
-- GitHub
-
-## Dataset
-
-The dataset contains customer-level banking information, including demographics, credit score, geography, account balance, product usage, activity status, estimated salary, and churn status.
-
-The target variable is:
-
-`Exited`
-
-Where:
-
-- `0` = customer stayed
-- `1` = customer churned
-
-Main features used:
-
-- `CreditScore`
-- `Geography`
-- `Gender`
-- `Age`
-- `Tenure`
-- `Balance`
-- `NumOfProducts`
-- `HasCrCard`
-- `IsActiveMember`
-- `EstimatedSalary`
-- `Exited`
-
-## Project Structure
-
-```text
-banking-customer-churn-analysis/
-├── README.md
-├── requirements.txt
-├── data/
-│   └── churn.csv
-├── images/
-│   ├── churn_distribution.png
-│   ├── churn_by_geography.png
-│   └── model_comparison.png
-└── notebooks/
-    └── banking_churn_analysis.ipynb
-```
-
-## Analysis Sections
-
-### 1. Data Loading and Initial Overview
-
-Loaded the dataset and checked the number of rows, columns, data types, and summary statistics.
-
-### 2. Data Cleaning
-
-Checked missing values, duplicate rows, and removed columns that were not useful for churn analysis:
-
-- `RowNumber`
-- `CustomerId`
-- `Surname`
-
-### 3. Target Variable Analysis
-
-Analyzed the churn distribution using the `Exited` variable.
-
-The dataset contains **10,000 customers**:
-
-- **7,963 customers** stayed with the bank
-- **2,037 customers** churned
-
-The overall churn rate is **20.37%**.
-
-This means that approximately **1 out of 5 customers left the bank**.
+2,037 of 10,000 customers churned. Roughly one in five.
 
 ![Customer Churn Distribution](images/churn_distribution.png)
 
-### 4. Categorical Feature Analysis
+## Analysis
 
-Analyzed churn patterns across categorical variables:
-
-- Geography
-- Gender
-- Credit card ownership
-- Active membership
-
-The goal was to identify whether certain customer groups had higher churn rates.
+Cleaning dropped three identifier columns (`RowNumber`, `CustomerId`, `Surname`); the data had no missing values to impute. EDA compared churn rates across geography, gender, card ownership and activity status, then compared the numeric features between churners and stayers. Simple segments (age band, balance band, activity) translate the patterns into groups a retention team can act on.
 
 ![Churn Rate by Geography](images/churn_by_geography.png)
 
-### 5. Numerical Feature Analysis
+Correlation analysis ranked the drivers:
 
-Compared numerical variables between customers who stayed and customers who churned.
+- **Age** has the strongest positive relationship with churn. Older customers leave more.
+- **Balance** also relates positively to churn: high-balance customers are not safe customers.
+- **Estimated salary** shows almost no relationship with churn.
+- Credit score, tenure and number of products show weak negative relationships.
 
-Main variables analyzed:
+## Models
 
-- Credit score
-- Age
-- Tenure
-- Balance
-- Number of products
-- Estimated salary
-
-### 6. Customer Segmentation
-
-Created simple customer segments based on:
-
-- Age group
-- Balance group
-- Activity status
-
-The goal was to make the analysis more business-oriented and easier to interpret for retention strategy.
-
-### 7. Correlation Analysis
-
-Checked relationships between numerical variables and churn.
-
-Main findings:
-
-- Age had the strongest positive relationship with churn
-- Balance also had a positive relationship with churn
-- Estimated salary had almost no relationship with churn
-- Credit score, tenure, and number of products had weak negative relationships with churn
-
-### 8. Machine Learning Models
-
-Three machine learning models were trained and compared:
-
-- Logistic Regression
-- Random Forest
-- Gradient Boosting
-
-The goal was to predict whether a customer would churn.
-
-## Model Results
+Logistic Regression, Random Forest and Gradient Boosting, trained to predict `Exited`:
 
 | Model | Accuracy | Precision | Recall | F1 Score |
 |---|---:|---:|---:|---:|
@@ -157,61 +37,35 @@ The goal was to predict whether a customer would churn.
 
 ![Model Performance Comparison](images/model_comparison.png)
 
-## Key Insights
+Gradient Boosting wins on every metric, and it still misses half of the customers who churn (recall 0.50). That gap matters more than the 0.87 accuracy: in retention, a missed churner is a lost customer, while a false positive costs one unnecessary retention offer. Any production use starts with raising recall, not accuracy.
 
-- The overall churn rate was **20.37%**
-- Older customers showed a higher tendency to churn
-- Customers with higher balances may still be at risk of leaving
-- Inactive customers are important to monitor for retention
-- Gradient Boosting achieved the best model performance
-- Recall is especially important in churn prediction because the business goal is to identify customers who may leave
+## Recommendations for a retention team
 
-## Business Recommendations
+1. **Watch older customers.** Age is the strongest churn signal in the data, so retention campaigns should weight age bands accordingly.
+2. **Treat high balances as at-risk, not as loyal.** Balance correlates with churn, and these are the most expensive customers to lose.
+3. **Re-engage inactive members.** Inactivity precedes churn; digital-banking nudges and personalized offers are the cheap first move.
+4. **Target by predicted risk, not by blanket campaigns.** Even at recall 0.50, scoring customers with the Gradient Boosting model focuses the retention budget on the right half of future churners.
 
-### 1. Focus on older customers
+## Next steps
 
-Age showed the strongest positive relationship with churn. The bank should monitor older customer segments more carefully and offer personalized retention campaigns.
+Threshold tuning for recall, hyperparameter optimization, feature engineering, and (the real unlock) transaction-level behavior data, which this dataset lacks.
 
-### 2. Monitor high-balance customers
+## Repository structure
 
-Customers with higher balances may have a stronger financial impact if they leave. The bank should identify high-balance customers with churn risk and provide premium retention offers.
+```text
+banking-customer-churn-analysis/
+├── README.md
+├── requirements.txt
+├── data/
+│   └── churn.csv
+├── images/
+└── notebooks/
+    └── banking_churn_analysis.ipynb
+```
 
-### 3. Improve engagement of inactive customers
+Tools: Python (pandas, NumPy, matplotlib, scikit-learn), Jupyter Notebook.
 
-Inactive customers are more likely to churn because they have weaker engagement with the bank. The bank can encourage them to use more services, digital banking tools, and personalized offers.
+---
 
-### 4. Use churn prediction for targeted retention
-
-The Gradient Boosting model can be used as a starting point for identifying customers who are more likely to churn.
-
-Instead of applying the same campaign to all customers, the bank can focus retention actions on customers with higher predicted churn risk.
-
-### 5. Improve the model before real business use
-
-Before using the model in a real banking environment, further improvements could include threshold tuning, hyperparameter optimization, feature engineering, and additional transaction-level customer behavior data.
-
-## Skills Demonstrated
-
-- Python data analysis
-- pandas data cleaning
-- Exploratory data analysis
-- Customer segmentation
-- Churn rate analysis
-- Data visualization
-- Correlation analysis
-- Logistic Regression
-- Random Forest
-- Gradient Boosting
-- Model evaluation
-- Business interpretation
-- Customer retention recommendations
-
-## Final Conclusion
-
-This project demonstrates how Python and machine learning can support customer churn analysis in retail banking.
-
-The analysis identified important churn-related patterns and compared three machine learning models.
-
-Gradient Boosting achieved the best overall performance with **0.87 accuracy**, **0.80 precision**, **0.50 recall**, and **0.61 F1 score**.
-
-The project shows how customer data can be used to support targeted retention strategies and data-driven decision-making in banking.
+**Author:** Mukhammed Yesmukhanbet — MSc Management, Finance and Data Analytics (LUMSA, Rome)
+[LinkedIn](https://www.linkedin.com/in/myesmukhanbet) · [GitHub](https://github.com/m-yesmukhanbet)
